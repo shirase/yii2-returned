@@ -65,7 +65,7 @@ JS;
                     array_shift($routes);
                 }
             }
-            $data = array('get'=>$_GET, 'post'=>$_POST, 'request'=>$_REQUEST, 'pathInfo'=>Yii::$app->request->pathInfo, 'queryString'=>$this->cleanQueryString(Yii::$app->request->queryString));
+            $data = array('get'=>$_GET, 'post'=>$_POST, 'request'=>$_REQUEST, 'pathInfo'=>Yii::$app->request->baseUrl.'/'.Yii::$app->request->pathInfo, 'queryString'=>$this->cleanQueryString(Yii::$app->request->queryString));
             $this->cleanParams($data['get']);
             $this->cleanParams($data['request']);
             $routes[$route] = $data;
