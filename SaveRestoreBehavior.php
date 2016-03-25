@@ -51,7 +51,7 @@ class SaveRestoreBehavior extends Behavior {
                 }
             }
             $data = array('get'=>$_GET, 'post'=>$_POST, 'request'=>$_REQUEST);
-            $routes[$routes] = $data;
+            $routes[$route] = $data;
             Yii::$app->session->set(self::$sessionKey, $routes);
         }
     }
