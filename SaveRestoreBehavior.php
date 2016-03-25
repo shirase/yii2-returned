@@ -2,14 +2,15 @@
 
 namespace shirase\returned;
 
-use yii\base\ActionFilter;
 use Yii;
+use yii\base\Behavior;
+use yii\web\Controller;
 
 /**
- * Class SaveRestoreFilter
+ * Class SaveRestoreBehavior
  * @package shirase\returned
  */
-class SaveRestoreFilter extends ActionFilter {
+class SaveRestoreBehavior extends Behavior {
 
     /**
      * @var int Number of saved routes
@@ -18,9 +19,19 @@ class SaveRestoreFilter extends ActionFilter {
 
     private static $sessionKey = 'xyeEdA8Gx8';
 
-    public function beforeAction($action)
+    /**
+     * @return array
+     */
+    public function events()
     {
-        $route = $action->controller->route;
+        return [
+            Controller::EVENT_BEFORE_ACTION => 'beforeAction'
+        ];
+    }
+
+    public function beforeAction()
+    {
+        $route = Yii::$app->controller->route;
 
         if (Yii::$app->request->get('returned')) {
             if ($routes = Yii::$app->session->get(self::$sessionKey)) {
