@@ -50,7 +50,7 @@ class SaveRestoreBehavior extends Behavior {
                             $url .= '?'.$data['queryString'];
                         }
                         $js = <<<JS
-window.history.replaceState([], "", "{$url}");
+if(window.history) window.history.replaceState([], "", "{$url}");
 JS;
                         Yii::$app->view->registerJs($js, View::POS_HEAD);
                     }
