@@ -20,6 +20,7 @@ class SaveRestoreBehavior extends Behavior {
     public $limit = 10;
 
     private static $sessionKey = 'xyeEdA8Gx8';
+    private static $needSave = true;
 
     /**
      * @return array
@@ -34,21 +35,23 @@ class SaveRestoreBehavior extends Behavior {
 
     public function beforeAction()
     {
-        $route = Yii::$app->controller->route;
-        $routes = Yii::$app->session->get(self::$sessionKey, array());
-        if ($routes[$route]) {
-            unset($routes[$route]);
-        } else {
-            if(sizeof($routes)>=$this->limit-1) {
-                array_shift($routes);
+        if (self::$needSave && !Yii::$app->request->get('returned')) {
+            $route = Yii::$app->controller->route;
+            $routes = Yii::$app->session->get(self::$sessionKey, array());
+            if ($routes[$route]) {
+                unset($routes[$route]);
+            } else {
+                if(sizeof($routes)>=$this->limit-1) {
+                    array_shift($routes);
+                }
             }
-        }
-        $data = array('get'=>$_GET, 'post'=>$_POST, 'request'=>$_REQUEST, 'pathInfo'=>Yii::$app->request->baseUrl.'/'.Yii::$app->request->pathInfo, 'queryString'=>$this->cleanQueryString(Yii::$app->request->queryString));
+            $data = array('get'=>$_GET, 'post'=>$_POST, 'request'=>$_REQUEST, 'pathInfo'=>Yii::$app->request->baseUrl.'/'.Yii::$app->request->pathInfo, 'queryString'=>$this->cleanQueryString(Yii::$app->request->queryString));
 
-        $this->cleanParams($data['get']);
-        $this->cleanParams($data['request']);
-        $routes[$route] = $data;
-        Yii::$app->session->set(self::$sessionKey, $routes);
+            $this->cleanParams($data['get']);
+            $this->cleanParams($data['request']);
+            $routes[$route] = $data;
+            Yii::$app->session->set(self::$sessionKey, $routes);
+        }
     }
 
     public function beforeRequest()
@@ -75,6 +78,8 @@ if(window.history) window.history.replaceState([], "", "{$url}");
 JS;
                         Yii::$app->view->registerJs($js, View::POS_HEAD);
                     }
+
+                    self::$needSave = false;
                 }
             }
         }
