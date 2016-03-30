@@ -4,6 +4,7 @@ namespace shirase\returned;
 
 use Yii;
 use yii\base\Behavior;
+use yii\web\Application;
 use yii\web\Controller;
 use yii\web\View;
 
@@ -26,15 +27,35 @@ class SaveRestoreBehavior extends Behavior {
     public function events()
     {
         return [
-            Controller::EVENT_BEFORE_ACTION => 'beforeAction'
+            Application::EVENT_BEFORE_REQUEST => 'beforeRequest',
+            Application::EVENT_BEFORE_ACTION => 'beforeAction',
         ];
     }
 
     public function beforeAction()
     {
         $route = Yii::$app->controller->route;
+        $routes = Yii::$app->session->get(self::$sessionKey, array());
+        if ($routes[$route]) {
+            unset($routes[$route]);
+        } else {
+            if(sizeof($routes)>=$this->limit-1) {
+                array_shift($routes);
+            }
+        }
+        $data = array('get'=>$_GET, 'post'=>$_POST, 'request'=>$_REQUEST, 'pathInfo'=>Yii::$app->request->baseUrl.'/'.Yii::$app->request->pathInfo, 'queryString'=>$this->cleanQueryString(Yii::$app->request->queryString));
 
+        $this->cleanParams($data['get']);
+        $this->cleanParams($data['request']);
+        $routes[$route] = $data;
+        Yii::$app->session->set(self::$sessionKey, $routes);
+    }
+
+    public function beforeRequest()
+    {
         if (Yii::$app->request->get('returned')) {
+            list ($route, $params) = Yii::$app->request->resolve();
+
             if ($routes = Yii::$app->session->get(self::$sessionKey)) {
                 if ($data = $routes[$route]) {
                     $_GET = (array)$data['get'];
@@ -56,20 +77,6 @@ JS;
                     }
                 }
             }
-        } else {
-            $routes = Yii::$app->session->get(self::$sessionKey, array());
-            if ($routes[$route]) {
-                unset($routes[$route]);
-            } else {
-                if(sizeof($routes)>=$this->limit-1) {
-                    array_shift($routes);
-                }
-            }
-            $data = array('get'=>$_GET, 'post'=>$_POST, 'request'=>$_REQUEST, 'pathInfo'=>Yii::$app->request->baseUrl.'/'.Yii::$app->request->pathInfo, 'queryString'=>$this->cleanQueryString(Yii::$app->request->queryString));
-            $this->cleanParams($data['get']);
-            $this->cleanParams($data['request']);
-            $routes[$route] = $data;
-            Yii::$app->session->set(self::$sessionKey, $routes);
         }
     }
 
