@@ -4,6 +4,7 @@ namespace shirase\returned;
 
 use Yii;
 use yii\base\Behavior;
+use yii\helpers\ArrayHelper;
 use yii\web\Application;
 use yii\web\Controller;
 use yii\web\View;
@@ -38,7 +39,7 @@ class SaveRestoreBehavior extends Behavior {
         if (self::$needSave && !Yii::$app->request->get('returned')) {
             $route = Yii::$app->controller->route;
             $routes = Yii::$app->session->get(self::$sessionKey, array());
-            if ($routes[$route]) {
+            if (isset($routes[$route])) {
                 unset($routes[$route]);
             } else {
                 if(sizeof($routes)>=$this->limit-1) {
@@ -98,7 +99,7 @@ JS;
         $res = array();
         $params = explode('&', $queryString);
         foreach($params as $param) {
-            if($param[0]!=='_') {
+            if(ArrayHelper::getValue($param, 0)!=='_') {
                 $res[] = $param;
             }
         }
