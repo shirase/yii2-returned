@@ -57,7 +57,9 @@ class SaveRestoreBehavior extends Behavior {
 
     public function beforeRequest()
     {
-        if (Yii::$app->request->get('returned')) {
+        if (isset($_GET['returned'])) {
+            unset($_GET['returned']);
+
             list ($route, $params) = Yii::$app->request->resolve();
 
             if ($routes = Yii::$app->session->get(self::$sessionKey)) {
@@ -78,6 +80,8 @@ class SaveRestoreBehavior extends Behavior {
 if(window.history) window.history.replaceState([], "", "{$url}");
 JS;
                         Yii::$app->view->registerJs($js, View::POS_HEAD);
+
+                        Yii::$app->request->url = $url;
                     }
 
                     self::$needSave = false;
